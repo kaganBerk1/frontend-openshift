@@ -1,16 +1,12 @@
-# Build aşaması
-FROM node:18-alpine as build
-
+FROM node:18 as build
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install
 COPY . .
-RUN npm run build
+RUN npm install && npm run build
 
-# Production aşaması
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Opsiyonel: nginx default konfigürasyonu değiştirebilirsin
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# OpenShift ile uyumlu hale getirmek için:
+RUN chmod -R 777 /var/cache/nginx /var/run /etc/nginx /usr/share/nginx/html
+
+USER 1001
